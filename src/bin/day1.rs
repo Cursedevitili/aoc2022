@@ -2,7 +2,7 @@ use std::process;
 use aoc2022::shared;
 use aoc2022::shared::write_output;
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 struct Elf {
     number: i32,
     calories: i32,
@@ -34,10 +34,21 @@ fn main() {
         }
     }
 
-    let most_calories = elves.iter().map(|x| x.calories).max().unwrap();
-    let elf_with_most_calories = elves.iter().rfind(|&x| x.calories == most_calories).unwrap();
+    let mut top_3_elves = vec![];
+    for _i in 0..3 {
+        let most_calories = elves.iter().map(|x| x.calories).max().unwrap();
+        let elf_with_most_calories = elves.iter().rfind(|&x| x.calories == most_calories).unwrap().clone();
+        let elf_to_remove_number = elves.iter().position(|x| x.number == elf_with_most_calories.number).unwrap();
+        top_3_elves.push(elf_with_most_calories);
+        elves.remove(elf_to_remove_number);
+    }
 
-    let output = format!("elf number:{} calories: {}",elf_with_most_calories.number, elf_with_most_calories.calories);
+    let mut output = String::new();
+    for elf in &top_3_elves {
+        output.push_str(&format!("elf number:{} calories: {}\n", elf.number, elf.calories))
+    }
+    let sum: i32 = top_3_elves.iter().map(|x| x.calories).sum();
+    output.push_str(&format!("Sum: {sum}"));
 
     match write_output("day1output.txt", &output) {
         Ok(_) => {println!("Success")}

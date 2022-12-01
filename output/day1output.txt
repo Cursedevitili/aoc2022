@@ -1,1 +1,4 @@
-elf number:4 calories: 24000
+elf number:230 calories: 69626
+elf number:179 calories: 68657
+elf number:214 calories: 68497
+Sum: 206780
