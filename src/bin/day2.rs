@@ -45,6 +45,17 @@ enum MatchOutcome {
     Tie
 }
 
+impl MatchOutcome {
+    fn parse(encoded_outcome: &str) -> MatchOutcome {
+        match encoded_outcome {
+            "X" => Lose,
+            "Y" => Tie,
+            "Z" => Win,
+            _ => Lose
+        }
+    }
+}
+
 #[derive(Debug, Copy, Clone)]
 struct Match {
     your_move: PlayerMove,
@@ -58,6 +69,37 @@ impl Match {
             your_move,
             enemy_move,
             outcome: None
+        }
+    }
+
+    fn new_by_outcome (opponent_move: PlayerMove, match_outcome: MatchOutcome) -> Match{
+        let your_move = match match_outcome {
+            Win => {
+                match opponent_move {
+                    Rock => {Paper}
+                    Paper => {Scissors}
+                    Scissors => {Rock}
+                }
+            }
+            Lose => {
+                match opponent_move {
+                    Rock => {Scissors}
+                    Paper => {Rock}
+                    Scissors => {Paper}
+                }
+            }
+            Tie => {
+                match opponent_move {
+                    Rock => {Rock}
+                    Paper => {Paper}
+                    Scissors => {Scissors}
+                }
+            }
+        };
+        Match {
+            your_move,
+            enemy_move: opponent_move,
+            outcome: Some(match_outcome)
         }
     }
 
@@ -105,7 +147,7 @@ impl Match {
 
 
 fn main() {
-    let input = shared::load_input("day2demo.txt").unwrap_or_else(|_|
+    let input = shared::load_input("day2.txt").unwrap_or_else(|_|
         {
             process::exit(1)
         }
@@ -129,5 +171,29 @@ fn main() {
         score += score_from_round;
     }
 
-    println!("{}", score);
+    let mut score_by_outcomes = 0;
+    for line in input.lines() {
+        let mut  iter = line.char_indices();
+        let (_, enemy_move) = iter.next().unwrap();
+        println!("Enemy move {}", enemy_move);
+        iter.next();
+        let (_, outcome) = iter.next().unwrap();
+        println!("Outcome {}", outcome);
+        let mut setup = Match::new_by_outcome(
+            PlayerMove::decode_enemy(&enemy_move.to_string()),
+            MatchOutcome::parse(&outcome.to_string())
+        );
+        setup.get_outcome();
+        println!("{:?}", setup);
+        let round_score = setup.get_score();
+        println!("Round score:{}", round_score);
+        score_by_outcomes += round_score;
+    }
+
+    // let score =0;
+    let mut output = format!("Final score {}", score);
+    output.push_str(&format!("\nFinal score by outcome {}", score_by_outcomes));
+    aoc2022::shared::write_output("day2output.txt", &output).unwrap_or_else(
+        |e| process::exit(1)
+    );
 }
