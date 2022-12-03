@@ -16,5 +16,5 @@ name="day2"
 path="src/bin/day2.rs"
 
 [[bin]]
-name="demoday1"
-path="src/bin/demoday01.rs"
+name="day3"
+path="src/bin/day3.rs"
