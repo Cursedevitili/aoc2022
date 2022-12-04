@@ -74,14 +74,31 @@ impl Rucksack{
     }
 }
 
-fn process_groups_three(group: Vec<Rucksack>) {
-    for sack in group {
 
+fn process_groups_three(group: Vec<Rucksack>) -> char {
+    let sack1contents = group[0].all_stuff.chars();
+    let sack2contents = &group[1].all_stuff;
+    let sack3contents = &group[2].all_stuff;
+    for item in sack1contents {
+        let mut item_in_2: bool = false;
+        let mut item_in_3: bool = false;
+        if sack2contents.contains(&item.to_string()) {
+            item_in_2 = true;
+        }
+        if sack3contents.contains(&item.to_string()) {
+            item_in_3 =true;
+        }
+
+        if item_in_2 && item_in_3 {
+            return item;
+        }
     }
+
+    'å'
 }
 
 fn main() {
-    let input = shared::load_input("day3demo2.txt").unwrap_or_else(
+    let input = shared::load_input("day3.txt").unwrap_or_else(
         |e| {
             println!("{}", e);
             std::process::exit(1)
@@ -89,6 +106,7 @@ fn main() {
     );
 
     let mut priority_sum = 0;
+    let mut badges_value_sum = 0;
     let mut output = String::from("");
 
     let mut rucksackgroup: Vec<Rucksack> = Vec::new();
@@ -97,7 +115,12 @@ fn main() {
         rucksack.parse_wrong_items();
         if rucksackgroup.len() < 3 {
             rucksackgroup.push(rucksack.clone());
-        } else {
+        }
+        if rucksackgroup.len() == 3 {
+            let shared_item = process_groups_three(rucksackgroup.clone());
+            let value = calc_item_priority(&shared_item);
+            badges_value_sum += value;
+            println!("shared_prio:{}", shared_item);
             rucksackgroup.clear()
         }
         println!("{:?}", rucksack);
@@ -105,5 +128,6 @@ fn main() {
         priority_sum += wrong_item_sum;
     }
     output.push_str(&format!("Sum of priorities: {}", priority_sum));
+    output.push_str(&format!("\nSum of badge value: {}", badges_value_sum));
     shared::write_output("day3output.txt",&output);
 }
