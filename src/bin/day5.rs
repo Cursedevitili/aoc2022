@@ -32,6 +32,7 @@ impl CargoShip {
         let from_sane = if order.from <= stack_len { true } else { false };
         let to_sane = if order.to <= stack_len { true } else { false };
         let how_many = order.how_many;
+        let mut helper_vec: Vec<char> = Vec::new();
 
         for _i in 0 ..how_many {
             match from_sane {
@@ -40,7 +41,7 @@ impl CargoShip {
                     match cargo_crate {
                         Some(x) => {
                             match to_sane {
-                                true => { self.stacks[to].push(x) }
+                                true => { helper_vec.push(x); }
                                 _ => { panic!(); }
                             }
                         }
@@ -49,6 +50,11 @@ impl CargoShip {
                 }
                 _ => { panic!(); }
             }
+        }
+
+        for i in 0..helper_vec.len() {
+            let removed_crate = helper_vec.pop().unwrap();
+            self.stacks[to].push(removed_crate);
         }
     }
 }
