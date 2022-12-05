@@ -1,1 +1,2 @@
 Chore pairs fully containing other one:536
+Chore pairs overlap: 845
