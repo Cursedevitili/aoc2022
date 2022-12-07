@@ -1,0 +1,2 @@
+Folder sizes under 100000: 30, summed size: 1490523
+Name: sbtl size if deleted: 12390492 is enough
