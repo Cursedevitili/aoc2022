@@ -18,15 +18,13 @@ impl Forest {
         }
     }
     
-    fn get_not_visible(&self) -> i32{
-        for i in 0..self.contents.len() {
-            for j in 0..self.contents[i].len() {
-                print!("{}", self.contents[i][j]);
-            }
-        }
-        
-        0
-    }
+    // fn get_not_visible(&self){
+    //     for i in 0..self.contents.len() {
+    //         for j in 0..self.contents[i].len() {
+    //             print!("{}", self.contents[i][j]);
+    //         }
+    //     }
+    // }
 
 }
 
@@ -40,5 +38,4 @@ fn main() {
     
     let mut forest = Forest::new(&input);
     print!("{:?}", forest);
-    let result = forest.get_not_visible();
 }
