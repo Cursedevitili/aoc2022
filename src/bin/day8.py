@@ -10,44 +10,44 @@ class Forest:
             temp_root.append(temp)
 
         self.contents: [[int]] = temp_root
+        self.max_score = 0
 
     def get_highest_top(self, i, j, acc) -> int:
         res = acc
         if i > 0:
-            if res < self.contents[i-1][j]:
-                res = self.contents[i-1][j]
+            if res < self.contents[i - 1][j]:
+                res = self.contents[i - 1][j]
             res = self.get_highest_top(i - 1, j, res)
         return res
 
     def get_highest_low(self, i, j, acc):
         res = acc
-        if i < len(self.contents)-1:
-            if res < self.contents[i+1][j]:
-                res = self.contents[i+1][j]
+        if i < len(self.contents) - 1:
+            if res < self.contents[i + 1][j]:
+                res = self.contents[i + 1][j]
             res = self.get_highest_low(i + 1, j, res)
         return res
 
     def get_highest_left(self, i, j, acc):
         res = acc
         if j > 0:
-            if res < self.contents[i][j-1]:
-                res = self.contents[i][j-1]
-            res = self.get_highest_left(i, j-1, res)
+            if res < self.contents[i][j - 1]:
+                res = self.contents[i][j - 1]
+            res = self.get_highest_left(i, j - 1, res)
         return res
 
     def get_highest_right(self, i, j, acc):
         res = acc
-        if j < len(self.contents[i])-1:
-            if res < self.contents[i][j+1]:
-                res = self.contents[i][j+1]
-            res = self.get_highest_right(i, j+1, res)
+        if j < len(self.contents[i]) - 1:
+            if res < self.contents[i][j + 1]:
+                res = self.contents[i][j + 1]
+            res = self.get_highest_right(i, j + 1, res)
         return res
-
 
     def get_how_many_not_visible(self):
         count = 0
-        lim_i = len(self.contents)-1
-        lim_j = len(self.contents[0])-1
+        lim_i = len(self.contents) - 1
+        lim_j = len(self.contents[0]) - 1
         for i in range(1, lim_i):
             for j in range(1, lim_j):
                 curr_value = self.contents[i][j]
@@ -60,12 +60,52 @@ class Forest:
                         and (right >= curr_value) \
                         and (low >= curr_value):
                     count = count + 1
+                else:
+                    score = self.calc_scenic_value(i, j)
+                    if score > self.max_score:
+                        self.max_score = score
 
         return count
 
+    def get_range_top(self, i, j, start_val, dist) -> int:
+        res = dist
+        if i > 0 and start_val < self.contents[i - 1][j]:
+            res = dist + 1
+            res = self.get_range_top(i - 1, j, start_val, res)
+        return res
+
+    def get_range_low(self, i, j, start_val, dist):
+        res = dist
+        if j < (len(self.contents) - 1) and start_val < self.contents[i + 1][j]:
+            res = dist + 1
+            res = self.get_range_top(i + 1, j, start_val, res)
+        return res
+
+    def get_range_left(self, i, j, start_val, dist):
+        res = dist
+        if j > 0 and start_val < self.contents[i][j - 1]:
+            res = dist + 1
+            res = self.get_range_top(i, j - 1, start_val, res)
+        return res
+
+    def get_range_right(self, i, j, start_val, dist):
+        res = dist
+        if j < (len(self.contents[i]) - 1) and start_val < self.contents[i][j + 1]:
+            res = dist + 1
+            res = self.get_range_top(i, j + 1, start_val, res)
+        return res
+
+    def calc_scenic_value(self, x, y):
+        top = self.get_range_top(x, y, self.contents[x][y], 0)
+        left = self.get_range_left(x, y, self.contents[x][y], 0)
+        right = self.get_range_right(x, y, self.contents[x][y], 0)
+        low = self.get_range_low(x, y, self.contents[x][y], 0)
+        return top * left * right * low
 
     def get_total_trees(self):
-        return len(self.contents)*len(self.contents[0])
+        return len(self.contents) * len(self.contents[0])
+
+
 def main():
     with open("./../../input/day8.txt") as f:
         lines: list = f.readlines()
