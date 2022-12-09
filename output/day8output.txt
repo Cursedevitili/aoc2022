@@ -1,0 +1,2 @@
+Visible trees: 1814
+Max scenic score: 330786 in pos x: 23 y:51
