@@ -4,18 +4,56 @@ class Prog:
     def __init__(self):
         self.x = 1
         self.cycles = 1
-        self.log = [(self.cycles, self.x, self.x * self.cycles,0)]
+        self.log = [(self.cycles, self.x, self.x * self.cycles)]
+        self.sprite_pos = 0
+        self.image = ""
+
+    def move_sprite(self, val: int):
+        self.sprite_pos = self.sprite_pos + val
+
+    def is_sprite_and_pixel_in_same_position(self):
+        row_position = (self.cycles % 40)-1
+        if row_position == 0 and self.cycles != 0:
+            self.image = self.image + "\n"
+
+        spritemax = self.sprite_pos + 2
+        if self.sprite_pos <= row_position <= spritemax:
+            self.image = self.image + "#"
+        else:
+            self.image = self.image + "."
+
+
+    def print_sprite_state(self):
+        print(f"Cycle: {self.cycles}")
+        print("Image")
+        print(self.image)
+        sprite_visualizer = ""
+        for i in range(40):
+            if self.sprite_pos <= i <= (self.sprite_pos+2):
+                sprite_visualizer = sprite_visualizer + "#"
+            else:
+                sprite_visualizer = sprite_visualizer + "."
+        print("Sprite")
+        print(sprite_visualizer)
+        print()
 
     def noop(self):
+        self.is_sprite_and_pixel_in_same_position()
+        self.print_sprite_state()
         self.cycles = self.cycles + 1
-        self.log.append((self.cycles, self.x, self.x * self.cycles, 0))
+        self.log.append((self.cycles, self.x, self.x * self.cycles))
 
     def add(self, val):
+        self.is_sprite_and_pixel_in_same_position()
+        self.print_sprite_state()
         self.cycles = self.cycles + 1
-        self.log.append((self.cycles, self.x, self.x * self.cycles, 0))
+        self.log.append((self.cycles, self.x, self.x * self.cycles))
+        self.is_sprite_and_pixel_in_same_position()
+        self.print_sprite_state()
         self.cycles = self.cycles + 1
         self.x = self.x + val
-        self.log.append((self.cycles, self.x, self.x * self.cycles, val))
+        self.log.append((self.cycles, self.x, self.x * self.cycles))
+        self.move_sprite(val)
 
     def get_sum_of(self, which: list):
         sum_of_which = 0
@@ -34,7 +72,7 @@ class Prog:
         return str
 
 def main():
-    with open("./../../input/day10demo.txt") as f:
+    with open("./../../input/day10.txt") as f:
         lines: input = f.readlines()
 
     prog = Prog()
@@ -53,8 +91,14 @@ def main():
             prog.noop()
 
     print(prog)
+    out1 = f"Sum is {prog.get_sum_of([20, 60, 100, 140, 180, 220])}"
+    print(out1)
+    out2 = f"CRT image: \n{prog.image}"
+    print(out2)
 
-    print(f"Sum is {prog.get_sum_of([20, 60, 100, 140, 180, 220])}")
+    with open('./../../output/day10output.txt', 'w') as f:
+        f.write(out1+"\n\n")
+        f.write(out2)
 
 
 
