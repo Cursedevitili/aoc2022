@@ -57,7 +57,7 @@ enum KnotMoveDir{
 
 impl KnotMoveDir {
     fn get(head:(i32, i32), tail:(i32, i32)) -> KnotMoveDir {
-        let diff = (head.1 - tail.1, head.0 - tail.0);
+        let diff = (head.0 - tail.0, head.1 - tail.1);
         if (diff.0 == -1 || diff.0 == 0 || diff.0 == 1) &&
             (diff.1 == -1 || diff.1 == 0 || diff.1 == 1) {
             return KnotMoveDir::NONE;
@@ -66,25 +66,31 @@ impl KnotMoveDir {
         let dir = match diff {
             (-1, 2) => KnotMoveDir::UpRight,
             (-2, 1) => KnotMoveDir::UpRight,
+            (-2, 2) => KnotMoveDir::UpRight,
             (-1,-2) => KnotMoveDir::UpLeft,
             (-2,-1) => KnotMoveDir::UpLeft,
+            (-2,-2) => KnotMoveDir::UpLeft,
             (1, 2) => KnotMoveDir::DownRight,
             (2, 1) => KnotMoveDir::DownRight,
+            (2, 2) => KnotMoveDir::DownRight,
             (1, -2) => KnotMoveDir::DownLeft,
             (2, -1) => KnotMoveDir::DownLeft,
+            (2, -2) => KnotMoveDir::DownLeft,
             // Easy ones
             (0, 2) => KnotMoveDir::RIGHT,
             (0, -2) => KnotMoveDir::LEFT,
             (-2, 0) => KnotMoveDir::UP,
             (2, 0) => KnotMoveDir::DOWN,
-            (_, _) => {} };
+            (_, _) => {panic!()} };
+
+        dir
     }
 }
 
 impl Grid {
     fn new() -> Grid {
         Grid {
-            map_len_uni: 40,
+            map_len_uni: 100,
             map_len_h: 30,
             map_len_v: 30,
             head_pos: (0, 0),
@@ -168,50 +174,6 @@ impl Grid {
         x_diff + y_diff - 2
     }
 
-    fn calc_sub_knot_len(&self, knot_num: i32) {
-        head = &self.head_pos;
-        tail = &self.tail1_pos;
-        match knot_num {
-            1 => {
-                head = &self.head_pos;
-                tail = &self.tail1_pos;
-            }
-            2 => {
-                head = &self.tail1_pos;
-                tail = &self.tail2_pos;
-            }
-            3 => {
-                head = &self.tail2_pos;
-                tail = &self.tail3_pos;
-            }
-            4 => {
-                head = &self.tail3_pos;
-                tail = &self.tail4_pos;
-            }
-            5 => {
-                head = &self.tail4_pos;
-                tail = &self.tail5_pos;
-            }
-            6 => {
-                head = &self.tail5_pos;
-                tail = &self.tail6_pos;
-            }
-            7 => {
-                head = &self.tail6_pos;
-                tail = &self.tail7_pos;
-            }
-            8 => {
-                head = &self.tail7_pos;
-                tail = &self.tail8_pos;
-            }
-            9 => {
-                head = &self.tail8_pos;
-                tail = &self.tail9_pos;
-            }
-
-            _ => { panic!()} }
-
-    }
 
     fn move_head(&mut self, dir: Dir) {
         match dir {
@@ -219,7 +181,8 @@ impl Grid {
                 for _ in 0..x {
                     let head_last_pos = self.head_pos;
                     self.head_pos = (self.head_pos.0 - 1, self.head_pos.1);
-                    self.move_tail(head_last_pos, 1);
+                    self.move_tail_head(head_last_pos, 1);
+                    self.move_tail_rest();
                     self.print_state();
                 }
             }
@@ -227,7 +190,8 @@ impl Grid {
                 for _ in 0..x {
                     let head_last_pos = self.head_pos;
                     self.head_pos = (self.head_pos.0 + 1, self.head_pos.1);
-                    self.move_tail(head_last_pos, 1);
+                    self.move_tail_head(head_last_pos, 1);
+                    self.move_tail_rest();
                     self.print_state();
                 }
             }
@@ -235,7 +199,8 @@ impl Grid {
                 for _ in 0..x {
                     let head_last_pos = self.head_pos;
                     self.head_pos = (self.head_pos.0, self.head_pos.1 - 1);
-                    self.move_tail(head_last_pos, 1);
+                    self.move_tail_head(head_last_pos, 1);
+                    self.move_tail_rest();
                     self.print_state();
                 }
             }
@@ -243,14 +208,15 @@ impl Grid {
                 for _ in 0..x {
                     let head_last_pos = self.head_pos;
                     self.head_pos = (self.head_pos.0, self.head_pos.1 + 1);
-                    self.move_tail(head_last_pos, 1);
+                    self.move_tail_head(head_last_pos, 1);
+                    self.move_tail_rest();
                     self.print_state();
                 }
             }
         }
     }
 
-    fn move_tail(&mut self, head_last_pos: (i32, i32), knot_num: i32) {
+    fn move_tail_head(&mut self, head_last_pos: (i32, i32), knot_num: i32) {
         let h_t_diff = self.calc_len(1);
 
         let mut head= &mut self.head_pos;
@@ -266,12 +232,51 @@ impl Grid {
     }
 
     fn move_tail_rest(&mut self) {
-        for i in 2..3 {
-            let dist = self.calc_len(i);
-            knot = match i {
-                1 => &mut self.tail1_positions,
-                _ => {} }
+        let mut tail_head_pos = self.tail1_pos;
+        for i in 2..10 {
+            let mut knot = match i {
+                2 => &mut self.tail2_pos,
+                3 => &mut self.tail3_pos,
+                4 => &mut self.tail4_pos,
+                5 => &mut self.tail5_pos,
+                6 => &mut self.tail6_pos,
+                7 => &mut self.tail7_pos,
+                8 => &mut self.tail8_pos,
+                9 => &mut self.tail9_pos,
+                _ => {panic!()} };
 
+
+            let dir = KnotMoveDir::get(tail_head_pos, *knot);
+            match dir {
+                KnotMoveDir::NONE => {}
+                KnotMoveDir::UP => {knot.0 = knot.0-1;}
+                KnotMoveDir::UpRight => {
+                    knot.0 = knot.0-1;
+                    knot.1 = knot.1+1;
+                }
+                KnotMoveDir::UpLeft => {
+                    knot.0 = knot.0-1;
+                    knot.1 = knot.1-1;
+                }
+                KnotMoveDir::DOWN => {knot.0 = knot.0+1;}
+                KnotMoveDir::DownRight => {
+                    knot.0 = knot.0+1;
+                    knot.1 = knot.1+1;
+                }
+                KnotMoveDir::DownLeft => {
+                    knot.0 = knot.0+1;
+                    knot.1 = knot.1-1;
+                }
+                KnotMoveDir::LEFT => {knot.1 = knot.1-1;}
+                KnotMoveDir::RIGHT => {knot.1 = knot.1+1;}
+            }
+            tail_head_pos = *knot;
+
+            if i == 9 {
+                if !self.tail9_positions.contains(knot){
+                    self.tail9_positions.push(*knot);
+                }
+            }
         }
     }
 
@@ -290,13 +295,30 @@ impl Grid {
         for i in -self.map_len_uni/2..self.map_len_uni/2 {
             for j in -self.map_len_uni/2..self.map_len_uni/2 {
                 if self.head_pos == (i, j) {
-                    map[(i+self.map_len_uni/2) as usize][(j+self.map_len_uni/2) as usize] = 'H';
+                    map[(i + self.map_len_uni / 2) as usize][(j + self.map_len_uni / 2) as usize] = 'H';
                 } else if self.tail1_pos == (i, j) {
-                    map[(i+self.map_len_uni/2) as usize][(j+self.map_len_uni/2) as usize] = 'T';
-                } else if (i, j) == (0, 0) {
-                    map[(i+self.map_len_uni/2) as usize][(j+self.map_len_uni/2) as usize] = 'S';
+                    map[(i + self.map_len_uni / 2) as usize][(j + self.map_len_uni / 2) as usize] = '1';
+                } else if self.tail2_pos == (i, j) {
+                    map[(i + self.map_len_uni / 2) as usize][(j + self.map_len_uni / 2) as usize] = '2';
+                } else if self.tail3_pos == (i, j) {
+                    map[(i + self.map_len_uni / 2) as usize][(j + self.map_len_uni / 2) as usize] = '3';
+                } else if self.tail4_pos == (i, j) {
+                    map[(i + self.map_len_uni / 2) as usize][(j + self.map_len_uni / 2) as usize] = '4';
+                }else if self.tail5_pos == (i, j) {
+                    map[(i + self.map_len_uni / 2) as usize][(j + self.map_len_uni / 2) as usize] = '5';
+                }else if self.tail6_pos == (i, j) {
+                    map[(i + self.map_len_uni / 2) as usize][(j + self.map_len_uni / 2) as usize] = '6';
+                }else if self.tail7_pos == (i, j) {
+                    map[(i + self.map_len_uni / 2) as usize][(j + self.map_len_uni / 2) as usize] = '7';
+                }else if self.tail8_pos == (i, j) {
+                    map[(i + self.map_len_uni / 2) as usize][(j + self.map_len_uni / 2) as usize] = '8';
+                }else if self.tail9_pos == (i, j) {
+                    map[(i + self.map_len_uni / 2) as usize][(j + self.map_len_uni / 2) as usize] = '9';
+                }
+                else if (i, j) == (0, 0) {
+                    map[(i + self.map_len_uni / 2) as usize][(j + self.map_len_uni / 2) as usize] = 'S';
                 } else {
-                    map[(i+self.map_len_uni/2) as usize][(j+self.map_len_uni/2) as usize] = '.'
+                    map[(i + self.map_len_uni / 2) as usize][(j + self.map_len_uni / 2) as usize] = '.'
                 }
             }
         }
@@ -340,7 +362,7 @@ impl Grid {
 }
 
 fn main() {
-    let input = aoc2022::shared::load_input("day9demo.txt").unwrap_or_else(
+    let input = aoc2022::shared::load_input("day9.txt").unwrap_or_else(
         |e| {
             println!("{}", e);
             std::process::exit(1)
@@ -380,5 +402,10 @@ fn main() {
     let tails_pos_len = grid.tail1_positions.len();
     let mut out1 = String::from("Tails positions: ");
     out1.push_str(&tails_pos_len.to_string());
+    let mut out2 = String::from("\nTail 9 positions: ");
+    out2.push_str(&grid.tail9_positions.len().to_string());
+    out1.push_str(&out2);
     println!("{}",out1);
+    println!("{}",out2);
+    aoc2022::shared::write_output("day9output.txt", &out1);
 }
