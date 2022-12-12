@@ -118,7 +118,7 @@ impl Map {
         for point in &self.points {
             let (y, x) = point.get_cords();
             let point_value = self.map[y][x].get_val();
-            let limit_visited = 20;
+            let limit_visited = 60;
 
             if x > 0 {
                 let left_val = self.map[y][x - 1].get_val();
@@ -222,7 +222,7 @@ impl Map {
             map_string.push_str("\n");
 
         }
-        // println!("{}", map_string);
+        println!("{}", map_string);
         false
     }
 }
@@ -241,7 +241,7 @@ fn main() {
     map.print_map();
 
     // println!("{:?}", map);
-    for i in 0 .. 1000 {
+    for i in 0 .. 500 {
         map.get_possible_moves();
         let ret = map.print_map();
         if ret {

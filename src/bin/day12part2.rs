@@ -1,4 +1,4 @@
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Eq, PartialEq)]
 enum MoveDir {
     Left,
     Right,
@@ -33,6 +33,13 @@ impl PointCoord {
 
     fn get_cords(&self) -> (usize, usize) {
         (self.current.0 as usize, self.current.1 as usize)
+    }
+}
+
+impl PartialEq for PointCoord
+{
+    fn eq(&self, other: &Self) -> bool {
+        self.current == other.current
     }
 }
 
@@ -106,9 +113,9 @@ impl Map {
         let pos: i32 = key_vec.iter().position(|&x| x == c).unwrap() as i32;
 
         match pos {
-            0 => MapPointType::MapStart(pos),
-            0..=26 => MapPointType::Point(pos),
-            27 => MapPointType::MapFinish(pos),
+            0 => MapPointType::MapFinish(pos),
+            1..=26 => MapPointType::Point(pos),
+            27 => MapPointType::MapStart(pos),
             _ => { panic!() }
         }
     }
@@ -118,65 +125,73 @@ impl Map {
         for point in &self.points {
             let (y, x) = point.get_cords();
             let point_value = self.map[y][x].get_val();
-            let limit_visited = 20;
+            let limit_visited = 50;
 
             if x > 0 {
                 let left_val = self.map[y][x - 1].get_val();
-                if (left_val - point_value == 1 || left_val - point_value <= 0) &&
+                if ((left_val - point_value) == -1 || (left_val - point_value) == 0 || (left_val - point_value) >= 1) &&
                     self.how_many_times_visited((y, x - 1)) < limit_visited {
-                    let finish = if left_val == 27 { true } else { false };
+                    let finish = if left_val == 1 { true } else { false };
                     let newpoint = PointCoord {
                         current: (y, x - 1),
                         came_from_dir: MoveDir::Left,
                         finished: finish,
                     };
-                    self.visited.push((y, x - 1));
-                    new_points.push(newpoint);
+                    if !new_points.contains(&newpoint){
+                        self.visited.push((y, x - 1));
+                        new_points.push(newpoint);
+                    }
                 }
             }
 
             if x < (self.v - 1) {
                 let right_val = self.map[y][x + 1].get_val();
-                if (right_val - point_value == 1 || right_val - point_value <= 0) &&
+                if ((right_val - point_value) == -1 || (right_val - point_value) == 0|| (right_val - point_value) >= 1) &&
                     self.how_many_times_visited((y, x + 1)) < limit_visited {
-                    let finish = if right_val == 27 { true } else { false };
+                    let finish = if right_val == 1 { true } else { false };
                     let newpoint = PointCoord {
                         current: (y, x + 1),
                         came_from_dir: MoveDir::Right,
                         finished: finish,
                     };
-                    self.visited.push((y, x + 1));
-                    new_points.push(newpoint);
+                    if !new_points.contains(&newpoint){
+                        self.visited.push((y, x + 1));
+                        new_points.push(newpoint);
+                    }
                 }
             }
 
             if y > 0 {
                 let up_val = self.map[y - 1][x].get_val();
-                if (up_val - point_value == 1 || up_val - point_value <= 0) &&
+                if ((up_val - point_value) == -1 || (up_val - point_value)== 0 || (up_val - point_value) >= 1) &&
                     self.how_many_times_visited((y - 1, x)) < limit_visited {
-                    let finish = if up_val == 27 { true } else { false };
+                    let finish = if up_val == 1 { true } else { false };
                     let newpoint = PointCoord {
                         current: (y - 1, x),
                         came_from_dir: MoveDir::Up,
                         finished: finish,
                     };
-                    self.visited.push((y - 1, x));
-                    new_points.push(newpoint);
+                    if !new_points.contains(&newpoint){
+                        self.visited.push((y - 1, x));
+                        new_points.push(newpoint);
+                    }
                 }
             }
 
             if y < (self.h - 1) {
                 let down_val = self.map[y + 1][x].get_val();
-                if (down_val - point_value == 1 || down_val - point_value <= 0) &&
+                if ((down_val - point_value) == -1 || (down_val - point_value) == 0 || (down_val - point_value) >= 1) &&
                     self.how_many_times_visited((y + 1, x)) < limit_visited {
-                    let finish = if down_val == 27 { true } else { false };
+                    let finish = if down_val == 1 { true } else { false };
                     let newpoint = PointCoord {
                         current: (y + 1, x),
                         came_from_dir: MoveDir::Down,
                         finished: finish,
                     };
-                    self.visited.push((y + 1, x));
-                    new_points.push(newpoint);
+                    if !new_points.contains(&newpoint){
+                        self.visited.push((y + 1, x));
+                        new_points.push(newpoint);
+                    }
                 }
             }
 
@@ -205,6 +220,19 @@ impl Map {
             }
             map_string.push_str("\n");
         }
+        let mut disp_vec: Vec<Vec<char>> = vec![];
+        for i in 0..self.h{
+            disp_vec.push(vec![]);
+            for _ in 0.. self.v{
+                disp_vec[i].push('.')
+            }
+        }
+        for p in &self.points {
+            let (y,x) = p.get_cords();
+            disp_vec[y][x] = '*'
+        }
+
+
         for point in &self.points {
             map_string.push_str("Point");
             map_string.push_str("\t");
@@ -222,7 +250,13 @@ impl Map {
             map_string.push_str("\n");
 
         }
-        // println!("{}", map_string);
+        for row in disp_vec {
+            for c in row {
+                map_string.push(c);
+            }
+            map_string.push_str("\n");
+        }
+        println!("{}", map_string);
         false
     }
 }
