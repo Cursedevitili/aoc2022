@@ -100,7 +100,7 @@ class Comparator:
 
 
 def main():
-    with open("../../input/day13demo.txt") as f:
+    with open("../../input/day13.txt") as f:
         lines = f.readlines()
 
     itertor = iter(lines)
