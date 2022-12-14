@@ -1,86 +1,81 @@
-def get_vals(parse_string: str):
-    ref_arr: list
-    arr = []
-    ref_arr = [arr]
-    i = 0
-    val_str = ""
-    for c in parse_string:
-        if c == "[":
-            new_ref = []
-            ref_arr[i].append(new_ref)
-            ref_arr.append(new_ref)
+def comp_arr(a, b) -> int:
+    if type(a) == list and type(b) == int:
+        b = [b]
+    if type(b) == list and type(a) == int:
+        a = [a]
+    if type(a) == int and type(b) == int:
+        if a < b:
+            return 1
+        elif a > b:
+            return -1
+    if type(a) == list and type(b) == list:
+        i = 0
+        while i < len(a) and i < len(b):
+            inner = comp_arr(a[i], b[i])
+            if inner == 1:
+                return 1
+            elif inner == -1:
+                return -1
             i = i + 1
-        if c == "]":
-            if val_str != "":
-                val = int(val_str)
-                ref_arr[i].append(val)
-                val_str = ""
-            ref_arr.pop()
-            i = i - 1
-        if c.isnumeric():
-            val_str = val_str + c
-        if c == "," and val_str != "":
-            val = int(val_str)
-            ref_arr[i].append(val)
-            val_str = ""
-
-    return arr
-
-
-iter_refs_left = []
-iter_refs_right = []
-
-
-def comp_pair(left_list: iter, right_list: iter, left_def = None, right_def = None ) -> (bool, bool):
-    if left_def != None:
-        left = left_def
-    else:
-        left = next(left_list, None)
-
-    if right_def != None:
-        right = left_def
-    else:
-        right = iter(right_list, None)
-    while right != None or left != None:
-        if type(left) == list or type(right) == list:
-            comp_pair(left_list, right_list)
-        elif type(left) == list and right_def != None:
-            comp_pair(left, right)
-        elif left_def != None and type(right) == list:
-            comp_pair(left, right)
-        elif type(left_list[i]) == int and type(right_list[i]) == int and left_list[i] != left_list[i]:
-            return left_list[i] < left_list[i]
-        elif left_def != None and right_def != None and left_def == right_def:
-            return True
-
-
+        if len(a) == len(b):
+            return 0
+        elif len(a) < len(b):
+            return 1
+        else:
+            return -1
 
 
 def main():
-    with open("../../input/day13demo.txt") as f:
+    with open("../../input/day13.txt") as f:
         lines = f.readlines()
-    vals = [list]
-    itertor = iter(lines)
-    while 1:
-        left = next(itertor)
-        # print(left)
-        vals.append(get_vals(left[1:-1]))
-        right = next(itertor)
-        # print(right)
-        vals.append(get_vals(right[1:-1]))
-        stop = next(itertor, None)
-        if stop == None:
-            break
+    arrs = []
+    for i in range(0, len(lines), 3):
+        row1 = eval(lines[i])
+        row2 = eval(lines[i + 1])
+        arrs.append(row1)
+        arrs.append(row2)
 
+    count = 1
     right_pairs = []
-    for i in range(0, len(vals), 2):
-        pass
-        # left = iter(vals[i])
-        # right = iter(vals[i+1])
-        # comp_pair(left, right)
+    for i in range(0, len(arrs), 2):
+        res = comp_arr(arrs[i], arrs[i + 1])
+        if res == 1:
+            right_pairs.append(count)
+        count = count + 1
 
-    print(right_pairs)
-    print(f"Sum of these is: {sum(right_pairs)}")
+    print(f"Right pairs: {right_pairs}")
+    print(f"Sum is: {sum(right_pairs)}")
+
+    arrs.append([[2]])
+    arrs.append([[6]])
+
+    i = 0
+    while i < len(arrs)-1:
+        a1 = arrs[i]
+        a2 = arrs[i + 1]
+        res = comp_arr(arrs[i], arrs[i + 1])
+        if res == 1:
+            i = i + 1
+            continue
+        else:
+            arrs[i] = a2
+            arrs[i + 1] = a1
+            i = 0
+            continue
+        break
+
+    ind1 = 0
+    ind2 = 0
+    for i, elem in enumerate(arrs):
+        if elem == [[2]]:
+            ind1 = i + 1
+        elif elem == [[6]]:
+            ind2 = i + 1
+
+    print()
+    print(f"Key 1: {ind1}")
+    print(f"Key 2: {ind2}")
+    print(f"Decoder key: {ind1 * ind2}")
 
 
 if __name__ == "__main__":
