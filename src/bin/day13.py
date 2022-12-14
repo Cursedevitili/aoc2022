@@ -27,25 +27,23 @@ def get_vals(parse_string: str):
     return arr
 
 
-def comp_pair(left_list: list, right_list: list, left_def = None, right_def = None ) -> bool:
-    if len(left_list) < len(right_list):
-        lenght = len(left_list)
-    elif len(left_list) == len(right_list):
-        lenght = len(left_list)
+iter_refs_left = []
+iter_refs_right = []
 
-    for i in range(lenght):
-        if left_def != None:
-            left = left_def
-        else:
-            left = left_list[i]
 
-        if right_def != None:
-            right = right_def
-        else:
-            right = left_list[i]
+def comp_pair(left_list: iter, right_list: iter, left_def = None, right_def = None ) -> (bool, bool):
+    if left_def != None:
+        left = left_def
+    else:
+        left = next(left_list, None)
 
+    if right_def != None:
+        right = left_def
+    else:
+        right = iter(right_list, None)
+    while right != None or left != None:
         if type(left) == list or type(right) == list:
-            comp_pair(left, right)
+            comp_pair(left_list, right_list)
         elif type(left) == list and right_def != None:
             comp_pair(left, right)
         elif left_def != None and type(right) == list:
@@ -55,13 +53,13 @@ def comp_pair(left_list: list, right_list: list, left_def = None, right_def = No
         elif left_def != None and right_def != None and left_def == right_def:
             return True
 
-    raise Exception
+
 
 
 def main():
     with open("../../input/day13demo.txt") as f:
         lines = f.readlines()
-    vals = []
+    vals = [list]
     itertor = iter(lines)
     while 1:
         left = next(itertor)
@@ -76,7 +74,10 @@ def main():
 
     right_pairs = []
     for i in range(0, len(vals), 2):
-        comp_pair(vals[i], vals[i+1])
+        pass
+        # left = iter(vals[i])
+        # right = iter(vals[i+1])
+        # comp_pair(left, right)
 
     print(right_pairs)
     print(f"Sum of these is: {sum(right_pairs)}")
