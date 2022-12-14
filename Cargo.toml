@@ -44,3 +44,7 @@ path="src/bin/day9.rs"
 [[bin]]
 name="day12part2"
 path="src/bin/day12part2.rs"
+
+[[bin]]
+name="day14"
+path="src/bin/day14.rs"
