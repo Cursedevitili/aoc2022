@@ -26,6 +26,7 @@ enum NMove {
     New(usize, usize),
     Stop(usize, usize),
     Abyss,
+    SourceFilled,
     D(usize, usize),
     Dl(usize, usize),
     Dr(usize, usize),
@@ -71,9 +72,9 @@ impl Map {
         }
 
         let mut map: Vec<Vec<MapObj>> = vec![];
-        for i in 0..y + 1 {
+        for i in 0..y + 1 + 2 + 1 { // (y + 1 + 2 + 1) Highest Y + 2 for floor and 1 to fot the floor
             map.push(vec![]);
-            for j in 0..x + 1 {
+            for j in 0..x + x + 1 { // (x + x + 1)Double map width
                 map[i].push(MapObj::Air)
             }
         }
@@ -86,7 +87,7 @@ impl Map {
                 let (yd, xd) = ((end.y - start.y) as i32, (end.x - start.x) as i32);
                 if yd != 0 {
                     if yd > 0 {
-                        for i in 0..yd+1 {
+                        for i in 0..yd + 1 {
                             map[(start.y + i) as usize][start.x as usize] = MapObj::Rock;
                         }
                     } else {
@@ -97,7 +98,7 @@ impl Map {
                     }
                 } else if xd != 0 {
                     if xd > 0 {
-                        for i in 0..xd+1 {
+                        for i in 0..xd + 1 {
                             map[start.y as usize][(start.x + i) as usize] = MapObj::Rock;
                         }
                     } else {
@@ -130,9 +131,12 @@ impl Map {
 
     fn get_down(&mut self, cur: NMove) -> NMove {
         let (y, x) = cur.get();
-        if y == self.y {
+        if y == self.y && self.map[self.y+2][x] != MapObj::Rock{
             return NMove::Abyss;
+        } else if self.map[0][500] == MapObj::Sand {
+            return NMove::SourceFilled;
         }
+
         return if self.map[y + 1][x] == MapObj::Air || self.map[y + 1][x] == MapObj::Route {
             self.map[y + 1][x] = MapObj::Route;
             NMove::D(y + 1, x)
@@ -163,6 +167,7 @@ impl Map {
                     self.map[y][x] = MapObj::Sand;
                     return true;
                 }
+                NMove::SourceFilled => { return false; }
             }
         }
     }
@@ -171,7 +176,7 @@ impl Map {
         let v = row / 100;
         let v: char = v.to_string().chars().next().unwrap();
         s.push(v);
-        let k = (row % 100)/10;
+        let k = (row % 100) / 10;
         let k: char = k.to_string().chars().next().unwrap();
         s.push(k);
         let y = row % 10;
@@ -183,7 +188,7 @@ impl Map {
         s.push(' ');
         s.push(' ');
         s.push(' ');
-        for i in self.draw_lim_x..self.x + 1 {
+        for i in 0..self.x + self.x + 1 {
             let h = i / 100;
             let h: char = h.to_string().chars().next().unwrap();
             s.push(h)
@@ -192,8 +197,8 @@ impl Map {
         s.push(' ');
         s.push(' ');
         s.push(' ');
-        for i in self.draw_lim_x..self.x + 1 {
-            let h = (i % 100)/10;
+        for i in 0..self.x + self.x + 1 {
+            let h = (i % 100) / 10;
             let h: char = h.to_string().chars().next().unwrap();
             s.push(h)
         }
@@ -201,7 +206,7 @@ impl Map {
         s.push(' ');
         s.push(' ');
         s.push(' ');
-        for i in self.draw_lim_x..self.x + 1 {
+        for i in 0..self.x + self.x + 1 {
             let h = i % 10;
             let h: char = h.to_string().chars().next().unwrap();
             s.push(h)
@@ -214,9 +219,9 @@ impl Map {
         let mut prt_str = String::new();
         self.add_Y_numbers(&mut prt_str);
 
-        for i in self.draw_lim_y..self.y + 1 {
+        for i in self.draw_lim_y..self.y + 2 + 1 {
             self.add_x_numbers(i, &mut prt_str);
-            for j in self.draw_lim_x..self.x + 1 {
+            for j in 0..self.x + self.x + 1 {
                 match self.map[i][j] {
                     MapObj::Air => prt_str.push('.'),
                     MapObj::Rock => prt_str.push('#'),
@@ -255,16 +260,30 @@ fn main() {
     let mut count = 0;
     loop {
         let res = map.add_sand();
-        clearscreen::clear().unwrap();
+        // clearscreen::clear().unwrap();
         if res == false {
             break;
         }
-        let mut line= String::new();
-        map.print();
-        println!("next");
-        std::io::stdin().read_line(&mut line);
+        // map.print();
+        // let mut line = String::new();
+        // println!("next");
+        // std::io::stdin().read_line(&mut line);
         count = count + 1;
     }
     map.print();
-    println!("Count: {}", count)
+    println!("Count for fall to abyss: {}", count);
+    for i in 0 .. map.x + map.x + 1{
+        map.map[map.y+2][i] = MapObj::Rock;
+    }
+
+    map.print();
+    loop {
+        let res = map.add_sand();
+        if res == false {
+            break;
+        }
+        count = count + 1;
+    }
+    map.print();
+    println!("Count for source to fill: {}", count);
 }
