@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 regex = "1.7.0"
 clearscreen = "1.0.10"
+itertools = "0.10.5"
 
 [[bin]]
 name="day1"
